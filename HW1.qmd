@@ -16,7 +16,7 @@ execute:
 
 ```{r echo = FALSE, warning=FALSE}
 ## Loading the required libraries
-library(ggplot2)   #For data visualization
+library(ggplot2)   #For data visualizations & plotting
 library(dplyr)     #For data manipulation
 library(readr)     #For reading the csv file dataset
 library(scales)    #For scaling infrastructure for ggplot
