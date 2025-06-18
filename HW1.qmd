@@ -1,0 +1,119 @@
+---
+title: "STAT40830 ADV Data Programming with R"
+author: "Pushkar M Telavane & 24223351"
+format: 
+  pdf:
+    documentclass: article
+    geometry: "margin=2cm"
+    mainfont: "Arial"
+editor: visual
+execute: 
+  echo: false
+  message: false
+  warning: false
+  error: false
+---
+
+```{r echo = FALSE, warning=FALSE}
+## Loading the required libraries
+library(ggplot2)   #For data visualization
+library(dplyr)     #For data manipulation
+library(readr)     #For reading the csv file dataset
+library(scales)    #For scaling infrastructure for ggplot
+library(corrplot)
+```
+
+## [Introduction :]{.underline}
+
+The report explores a housing price dataset containing 545 observations with 6 numeric and 7 categorical variables. The dataset belongs to a city in India with housing rates influenced by the area and other factors. With determining the relation of price with respect to the other factors, will help the builders to understand the on-going trend and buyers perspective while purchasing a property.
+
+### *Loading the house price dataset*
+
+```{r}
+df <- read_csv("house-price.csv", show_col_types = FALSE)
+```
+
+```{r echo=FALSE, , results='hide' }
+str(df)
+```
+
+The dataset includes house price, area, number of bedrooms and bathrooms with different furnishing features.
+
+## [Data Preparation:]{.underline}
+
+Checking for any missing values as well converting the columns to factors for better exploration.
+
+```{r, results='hide'}
+## Checking for missing values in the dataset
+colSums(is.na(df))
+```
+
+```{r}
+# Converting the columns to the resp factors
+df <- df %>%
+  mutate(
+    mainroad = as.factor(mainroad),
+    guestroom = as.factor(guestroom),
+    basement = as.factor(basement),
+    hotwaterheating = as.factor(hotwaterheating),
+    airconditioning = as.factor(airconditioning),
+    prefarea = as.factor(prefarea),
+    furnishingstatus = as.factor(furnishingstatus)
+  )
+```
+
+## [Exploratory Data Analysis:]{.underline}
+
+The plot shows the variance of price raises w.r.t to area. The red line indicating a linear regression fit.
+
+```{r}
+# Area vs Price Plot 
+ggplot(df, aes(x = area, y = price)) +
+  geom_point(alpha = 0.6, color = "darkgreen") +
+  geom_smooth(method = "lm", se = FALSE, color = "red") +
+  scale_y_continuous(labels = label_number(scale = 1e-5, suffix = "L")) +
+  labs(title = "Area vs Price", x = "Area (sq ft)", y = "Price (in Lakhs)")
+
+
+```
+
+**Results :** It is quite evident tat area plays a major factor in variation of the housing prices with red line representing a positive correlation. A major chuck of price w.r.t to are falls under the range of 3000 to 8000 sq ft per flat as many flats in India are majorly two or three bhks. Few outliers are observed beyond the range of 12000 sq ft maybe it would be premium penthouse or bungalows. Also, most of the house properties ranging from 20 to 80 lakhs as occupied by the low or middle class persons.
+
+## [Data Visualization :]{.underline}
+
+```{r}
+# Boxplot for Air Conditioning
+ggplot(df, aes(x = airconditioning, y = price, fill = airconditioning)) +
+  geom_boxplot() +
+  scale_y_continuous(labels = label_number(scale = 1e-5, suffix = "L")) +
+  labs(title = "Price by Air Conditioning", x = "Air Conditioning", y = "Price (in Lakhs)")
+
+# Boxplot for Furnishing Level
+ggplot(df, aes(x = furnishingstatus, y = price, fill = furnishingstatus)) +
+  geom_boxplot() +
+  scale_y_continuous(labels = label_number(scale = 1e-5, suffix = "L")) +
+  labs(title = "Price by Furnishing Status", x = "Furnishing Status", y = "Price (in Lakhs)")
+
+```
+
+**Plot 1 :** The homes with air Conditioner have the higher prices as the setup and installation and maintenance is quite expensive. Both the options have outliers but the no option has more comparatively. In recent times, people prefer the homes with air conditioning as the box variation is more with longer whiskers. Ranging from 30 to 75 lakhs aprrox the range for the price of home.
+
+**Plot 2 :** Furnishing the house or apartment increases the value totally but the budget constraint buyers may choose the unfurnished or semi-furnished as it lowers the cost significantly. We can observe a significant outliers throughout the options of furnishing status. Furnished homes has the widest IQR as nowadays the buyers prefers the most of the worked estate.
+
+## [Correlation Analysis:]{.underline}
+
+```{r}
+## Correlation Analysis
+
+numeric_df <- select(df, where(is.numeric))
+cor_matrix <- cor(numeric_df)
+
+corrplot::corrplot(cor_matrix, method = "color", type = "upper", tl.cex = 0.8)
+
+```
+
+**Results :**
+
+-   The price is mostly influenced by the factors of **area, bathrooms, stories** and **parking** respectively.
+-   While, the bedrooms have a **weaker influence** as compared to other variables.
+-   We can observe , their are **no strong negative correlation** , as all of the factors contribute to a certain extend to the property price.
